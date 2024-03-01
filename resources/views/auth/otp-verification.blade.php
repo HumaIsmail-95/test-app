@@ -2,10 +2,10 @@
     <!-- Session Status -->
     {{-- <x-auth-session-status class="mb-4" :status="session('status')" /> --}}
     @if(session('status') && session('message'))
-    <div class="{{ session('status') }}">
-        {{ session('message') }}
-    </div>
-@endif
+        <div class="{{ session('status') }}">
+            {{ session('message') }}
+        </div>
+    @endif
 @php
 $user_id = request('user_id');
 @endphp

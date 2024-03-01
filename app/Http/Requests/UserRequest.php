@@ -25,7 +25,7 @@ class UserRequest extends FormRequest
      */
     public function rules(Request $request)
     {
-        $route_id = $request->route('users');
+        $route_id = $request->route('user')->id;
 
 
         if(empty($route_id) && $request->isMethod('put') ):
@@ -33,7 +33,7 @@ class UserRequest extends FormRequest
         endif;
         return [
             'name' => ['required', 'string', 'max:255'],
-            'mobile_no' => ['required', 'integer'],
+            'mobile_no' => ['required','numeric'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users')->ignore($route_id)],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];

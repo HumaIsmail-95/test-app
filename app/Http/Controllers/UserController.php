@@ -25,6 +25,7 @@ class UserController extends Controller
             return redirect(route('users.index'));
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+            return back()->with(['status'=>'error','message'=>$th->getMessage()]);
         }
     }
     public function show(User $user){
@@ -32,6 +33,7 @@ class UserController extends Controller
             return view('user.edit',compact('user'));
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+            return back()->with(['status'=>'error','message'=>$th->getMessage()]);
         }
     }
 
@@ -41,6 +43,7 @@ class UserController extends Controller
             return redirect(route('users.index'));
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+            return back()->with(['status'=>'error','message'=>$th->getMessage()]);
             //throw $th;
         }
     }
@@ -50,6 +53,7 @@ class UserController extends Controller
             return back();
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+            return back()->with(['status'=>'error','message'=>$th->getMessage()]);
             //throw $th;
         }
     }

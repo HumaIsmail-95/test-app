@@ -19,7 +19,7 @@ class UserService
             'password' => Hash::make($request->password),
         ]);
         session()->flash('status', 'success');
-        session()->flash('message', 'User registered successfully');
+        session()->flash('message', 'User added successfully');
         DB::commit();
         return $response;
     }

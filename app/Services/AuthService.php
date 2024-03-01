@@ -8,6 +8,7 @@ use App\Mail\SendOtpMail;
 use App\Models\User;
 use App\Models\VerificationCode;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -16,9 +17,7 @@ class AuthService
 {
     public static function generateOTP(LoginRequest $request)
     {
-        // $request->authenticate();
         $credentials = $request->only('email', 'password');
-
         if (Auth::attempt($credentials)) {
             DB::beginTransaction();
             $user = User::where('email', $request->email)->first();
@@ -41,7 +40,7 @@ class AuthService
             }
             DB::commit();
         } else {
-            $response = ['status' => 'error', 'message' => 'Invalid username or password'];
+            throw new Exception('Invalid username or password', 1);
         }
         session()->flash('status', $response['status']);
         session()->flash('message', $response['message']);

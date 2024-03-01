@@ -30,10 +30,9 @@ class AuthenticatedSessionController extends Controller
     {
         try {
             $response = AuthService::generateOTP($request);
-           
-            
-            return redirect(route('verification',['user_id' => $response['user_id']]));
+            return redirect(route('verification', ['user_id' => $response['user_id']]));
         } catch (\Throwable $th) {
+            return back()->with(['status' => 'error', 'message' => $th->getMessage()]);
             Log::error($th->getMessage());
             dd($th->getMessage());
         }
@@ -47,10 +46,10 @@ class AuthenticatedSessionController extends Controller
 
         try {
             $response = AuthService::verifyOTP($request);
-            
-            if ($response['status']=='success') {
+
+            if ($response['status'] == 'success') {
                 return redirect()->intended(RouteServiceProvider::HOME);
-            }else{
+            } else {
                 return back();
             }
             //code...
