@@ -11,37 +11,39 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
     public static function generateOTP(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            DB::beginTransaction();
-            $user = User::where('email', $request->email)->first();
-            $verificationCode = VerificationCode::where('user_id', $user->id)->first();
-            $now = Carbon::now();
-            if ($verificationCode && $now->isBefore($verificationCode->expire_at)) {
-                $user->otp = $verificationCode->otp;
-                $user->expire_at = $verificationCode->expire_at;
-                $response = ['status' => 'success', 'message' => 'Otp already sent.', 'user_id' => $user->id];
-            } else {
-                $verificationCode = VerificationCode::create([
-                    'user_id' => $user->id,
-                    'expire_at' => Carbon::now()->addMinutes(60),
-                    'otp' => rand(100000, 999999),
-                ]);
-                $user->otp = $verificationCode->otp;
-                $user->expire_at = $verificationCode->expire_at;
-                Mail::to($user->email)->send(new SendOtpMail($user));
-                $response = ['status' => 'success', 'message' => 'Otp sent Successfully.', 'user_id' => $user->id];
-            }
-            DB::commit();
-        } else {
+        $pass =  Hash::make($request->password);
+        $user = User::where('email', $request->email)->where('password', $pass)->first();
+        if ($user) {
             throw new Exception('Invalid username or password', 1);
         }
+        DB::beginTransaction();
+        $user = User::where('email', $request->email)->first();
+        $verificationCode = VerificationCode::where('user_id', $user->id)->first();
+        $now = Carbon::now();
+        if ($verificationCode && $now->isBefore($verificationCode->expire_at)) {
+            $user->otp = $verificationCode->otp;
+            $user->expire_at = $verificationCode->expire_at;
+            $response = ['status' => 'success', 'message' => 'Otp already sent.', 'user_id' => $user->id];
+        } else {
+            $verificationCode = VerificationCode::create([
+                'user_id' => $user->id,
+                'expire_at' => Carbon::now()->addMinutes(60),
+                'otp' => rand(100000, 999999),
+            ]);
+            $user->otp = $verificationCode->otp;
+            $user->expire_at = $verificationCode->expire_at;
+            Mail::to($user->email)->send(new SendOtpMail($user));
+            $response = ['status' => 'success', 'message' => 'Otp sent Successfully.', 'user_id' => $user->id];
+        }
+        DB::commit();
+
         session()->flash('status', $response['status']);
         session()->flash('message', $response['message']);
         return $response;
@@ -55,7 +57,7 @@ class AuthService
             $response = ['status' => 'error', 'message' => 'Otp is expired.', 'user' => $request->user_id];
         } else {
             if ($verificationCode) {
-                $user = User::where('id',$request->user_id)->first();
+                $user = User::where('id', $request->user_id)->first();
                 if ($user) {
                     $response = ['status' => 'success', 'message' => 'User logged in'];
                     $request->session()->regenerate();
