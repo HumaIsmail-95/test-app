@@ -60,8 +60,16 @@ class AuthService
                 $user = User::where('id', $request->user_id)->first();
                 if ($user) {
                     $response = ['status' => 'success', 'message' => 'User logged in'];
+                    $credentials = [
+                        'email' => $user['email'],
+                        'password' => $user['password'],
+                    ];
+                    Auth::login($user);
                     $request->session()->regenerate();
                     // VerificationCode::where('user_id', $request->user_id)->delete();
+                }else{
+                    $response = ['status' => 'error', 'message' => 'User not found'];
+
                 }
             } else {
                 $response = ['status' => 'error', 'message' => 'Incorrect OTP'];

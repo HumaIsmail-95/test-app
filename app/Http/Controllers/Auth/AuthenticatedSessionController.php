@@ -54,6 +54,7 @@ class AuthenticatedSessionController extends Controller
             }
             //code...
         } catch (\Throwable $th) {
+            return back()->with(['status' => 'error', 'message' => $th->getMessage()]);
             Log::error($th->getMessage());
             dd($th->getMessage());
 
